@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="419eb4d4-d9e3-4388-9d45-cd274588b865" >
+		<jms:active-mq-connection>
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" maxRedelivery="4"/>
+		</jms:active-mq-connection>
+	</jms:config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="5da0109b-cf14-4f08-910a-faabdc58147d" />
+	<flow name="jms_transactionsFlow" doc:id="29f205b3-6dec-4fa1-95ac-2e81db774bc3" >
+		<jms:listener doc:name="Listener" doc:id="872f2ca3-d4fc-431a-9324-64b5a3bc9b47" config-ref="JMS_Config" destination="dummyqueue" ackMode="AUTO" transactionalAction="ALWAYS_BEGIN" primaryNodeOnly="false">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="a24a0538-4a2f-4bca-8baa-ab4aa0a5e6f6" message="redileviery count #[attributes.properties.jmsxProperties.jmsxDeliveryCount]" />
+		<set-variable value="#[payload as Number]" doc:name="Set Variable" doc:id="e5275b35-39d3-492c-8195-3ea9ae7d8e49" variableName="errorVar" />
+		<logger level="INFO" doc:name="Logger" doc:id="041e54be-5b96-4b89-a967-868dddea0f3d" message="transaction completes sucessfuly"/>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d4dd8337-bd4c-44cc-ad44-fa403485e161" >
+				<logger level="INFO" doc:name="Logger" doc:id="74463d73-1957-4093-a42f-42204de1404a" message="error in logger" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

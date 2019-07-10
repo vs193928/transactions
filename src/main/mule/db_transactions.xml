@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="538c0db7-3aa6-4245-b722-2b0e66838a00" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="488551bc-411b-4cbf-b0cf-9535a57d881a" >
+		<db:my-sql-connection host="127.0.0.1" port="3306" user="root" database="orders" />
+	</db:config>
+	<flow name="db_transactionsFlow" doc:id="74e67c44-3a29-4998-9923-62e64e021a5b" >
+		<http:listener doc:name="Listener" doc:id="f46c9a3c-7b83-4b4a-8f91-6c50c74d6eb7" config-ref="HTTP_Listener_config" path="/transactions"/>
+		<try doc:name="Try" doc:id="507a15ef-2e65-433c-86e8-7c7a9c1c304c" transactionalAction="ALWAYS_BEGIN">
+			<db:insert doc:name="Insert" doc:id="20c24699-3f4f-4335-8130-fa4a45d10104" config-ref="Database_Config">
+			<db:sql>insert into orders.customer_details values ('11','vikas','sharma')</db:sql>
+		</db:insert>
+			<db:insert doc:name="Insert" doc:id="ffee4ef1-6b16-449a-92a1-b2eae38280e5" config-ref="Database_Config" transactionalAction="ALWAYS_JOIN">
+			<db:sql>insert into orders.customer_address (CUSTOMER_ID,address) values ('11','Atlanta')</db:sql>
+		</db:insert>
+		</try>
+		<set-payload value="sucess!!" doc:name="Set Payload" doc:id="6a137594-ea3c-48c6-a831-4a310784f8bf" />
+	</flow>
+</mule>
